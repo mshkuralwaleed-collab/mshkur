@@ -1,0 +1,76 @@
+/**
+ * @fileoverview Firestore Security Rules for Mshkur AI Studio.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for point records,
+ * and allows public read access to referral records with owner-only writes
+ * after validating ownership.
+ *
+ * Data Structure:
+ * - User-specific point data is nested under `/users/{userId}/points/{pointId}`.
+ * - Referral data is stored in the top-level `/referrals/{referralId}` collection.
+ *
+ * Key Security Decisions:
+ * - Users can only access their own point records.
+ * - Referral records are publicly readable, but creation, updates, and deletion are restricted to the owner.
+ * - Listing all referrals is allowed.
+ * - Listing points is allowed for the owner of the points only.
+ *
+ * Denormalization for Authorization:
+ * - `referrals` documents store `referrerId` and `referredUserId` within each document to avoid costly `get()` calls to the `/users` collection and enable secure, independent authorization.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Grants access to a user's point records based on path-based ownership.
+     * @path /users/{userId}/points/{pointId}
+     * @allow (create) - User `user_abc` can create a point record under /users/user_abc/points/point_123, where the point record has userId `user_abc`.
+     * @allow (get, list) - User `user_abc` can read point record under /users/user_abc/points/point_123.
+     * @allow (update, delete) - User `user_abc` can update and delete point record under /users/user_abc/points/point_123.
+     * @deny (create) - User `user_xyz` cannot create a point record under /users/user_abc/points/point_123.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/points/{pointId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Grants public read access to referral records, but restricts writes to the owner.
+     * @path /referrals/{referralId}
+     * @allow (get, list) - Any user can read any referral record.
+     * @allow (create) - User `user_abc` can create a referral record where the referrerId is `user_abc`.
+     * @allow (update, delete) - User `user_abc` can update or delete a referral record where the referrerId is `user_abc`.
+     * @deny (create) - User `user_xyz` cannot create a referral record where the referrerId is `user_abc`.
+     * @principle Enforces owner-only writes for a publicly readable collection.
+     */
+    match /referrals/{referralId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.referrerId == request.auth.uid;
+      allow update: if isSignedIn() && isExistingOwnerReferral(resource.data.referrerId);
+      allow delete: if isSignedIn() && isExistingOwnerReferral(resource.data.referrerId);
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+      return isSignedIn() && isOwner(userId) && resource != null;
+    }
+
+    function isExistingOwnerReferral(referrerId) {
+      return isSignedIn() && request.auth.uid == referrerId && resource != null;
+    }
+  }
+}

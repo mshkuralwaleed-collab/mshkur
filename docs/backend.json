@@ -1,0 +1,149 @@
+{
+  "entities": {
+    "Referral": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Referral",
+      "type": "object",
+      "description": "Represents a referral record in the system, tracking shares and associated UTM parameters.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the referral record."
+        },
+        "referrerId": {
+          "type": "string",
+          "description": "Reference to the User who initiated the referral. (Relationship: User 1:N Referral)"
+        },
+        "referredUserId": {
+          "type": "string",
+          "description": "Reference to the User who was referred. (Relationship: User 1:N Referral)"
+        },
+        "shareDate": {
+          "type": "string",
+          "description": "Date and time when the referral was initiated.",
+          "format": "date-time"
+        },
+        "utmSource": {
+          "type": "string",
+          "description": "UTM source parameter for tracking the origin of the referral."
+        },
+        "utmMedium": {
+          "type": "string",
+          "description": "UTM medium parameter for tracking the marketing medium used for the referral."
+        },
+        "utmCampaign": {
+          "type": "string",
+          "description": "UTM campaign parameter for tracking the specific campaign associated with the referral."
+        },
+        "utmTerm": {
+          "type": "string",
+          "description": "UTM term parameter for tracking the keywords used in the referral."
+        },
+        "utmContent": {
+          "type": "string",
+          "description": "UTM content parameter for differentiating ads or links in the referral."
+        }
+      },
+      "required": [
+        "id",
+        "referrerId",
+        "shareDate"
+      ]
+    },
+    "Point": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Point",
+      "type": "object",
+      "description": "Represents a record of points earned or spent by a user, along with associated reward history and user tier.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the point record."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who owns these points. (Relationship: User 1:N Point)"
+        },
+        "pointsEarned": {
+          "type": "number",
+          "description": "Number of points earned in this record."
+        },
+        "pointsSpent": {
+          "type": "number",
+          "description": "Number of points spent in this record."
+        },
+        "transactionDate": {
+          "type": "string",
+          "description": "Date and time of the point transaction.",
+          "format": "date-time"
+        },
+        "rewardId": {
+          "type": "string",
+          "description": "Reference to the Reward associated with this point transaction. (Relationship: Reward 1:N Point).  Can be null if points are not associated with a specific reward."
+        },
+        "userTier": {
+          "type": "string",
+          "description": "User's current tier (e.g., Bronze, Silver, Gold) based on their points balance."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the reward."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "pointsEarned",
+        "pointsSpent",
+        "transactionDate"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}/points/{pointId}",
+        "definition": {
+          "entityName": "Point",
+          "schema": {
+            "$ref": "#/backend/entities/Point"
+          },
+          "description": "Stores point records for each user. Path-based ownership ensures only the user can access their own points. Includes userId to support authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who owns the points."
+            },
+            {
+              "name": "pointId",
+              "description": "The ID of the point record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/referrals/{referralId}",
+        "definition": {
+          "entityName": "Referral",
+          "schema": {
+            "$ref": "#/backend/entities/Referral"
+          },
+          "description": "Stores referral records, including UTM parameters. `referrerId` and `referredUserId` are stored within each document to support authorization independence.",
+          "params": [
+            {
+              "name": "referralId",
+              "description": "The ID of the referral record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support the Mshkur AI Studio application, focusing on user-owned data and collaborative features like the viral referral system. Authorization Independence is achieved by storing user IDs directly within the `referrals` and `points` collections. \n\n*   **User Data Segregation:** User-specific data (points) is stored under `/users/{userId}` to ensure only the user has access.\n*   **Referral Data:** Referrals are stored in a top-level `/referrals` collection, avoiding hierarchical dependencies. The `referrerId` and `referredUserId` are stored within each referral document, providing authorization independence.\n\nThis structure facilitates simple and robust security rules by avoiding `get()` calls and enabling secure list operations (QAPs) by scoping user data under their respective user IDs and providing flat collections for referrals. The structure also supports invariants such as ensuring data integrity for ownership and timestamps."
+  }
+}

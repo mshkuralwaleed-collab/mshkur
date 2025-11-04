@@ -37,6 +37,11 @@ export const translations = {
     'logo-generated-desc': 'Your new logo is ready.',
     'background-generated-title': 'Background Generated',
     'background-generated-desc': 'Your new 3D background is ready.',
+    'whatsapp-share-message': 'Check out my digital business card!',
+    'chatbot-title': 'AI Assistant',
+    'chatbot-desc': 'Ask me anything about this person.',
+    'chatbot-placeholder': 'Type your question...',
+    'chatbot-error': 'Sorry, I ran into an issue. Please try again.',
   },
   ar: {
     'mshkur-ai-studio': 'استوديو مشكور للذكاء الاصطناعي',
@@ -77,5 +82,10 @@ export const translations = {
     'logo-generated-desc': 'شعارك الجديد جاهز.',
     'background-generated-title': 'تم إنشاء الخلفية',
     'background-generated-desc': 'خلفيتك ثلاثية الأبعاد الجديدة جاهزة.',
+    'whatsapp-share-message': 'اطلع على بطاقة أعمالي الرقمية!',
+    'chatbot-title': 'المساعد الذكي',
+    'chatbot-desc': 'اسألني أي شيء عن هذا الشخص.',
+    'chatbot-placeholder': 'اكتب سؤالك...',
+    'chatbot-error': 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.',
   },
 };

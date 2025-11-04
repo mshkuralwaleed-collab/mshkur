@@ -221,8 +221,7 @@
   },
   "auth": {
     "providers": [
-      "password",
-      "anonymous"
+      "google.com"
     ]
   },
   "firestore": {
@@ -281,7 +280,7 @@
       },
       {
         "path": "/users/{userId}/posts/{postId}",
-        "definition": {
+        "definition": a{
           "entityName": "Post",
           "schema": {
             "$ref": "#/backend/entities/Post"
@@ -323,5 +322,3 @@
     "reasoning": "The Firestore structure is designed to support the Mshkur AI Studio application, focusing on user-owned data and collaborative features like the viral referral system. Authorization Independence is achieved by storing user IDs directly within the `referrals` and `points` collections. \n\n*   **User Data Segregation:** User-specific data (points, posts, social_media_accounts) is stored under `/users/{userId}` to ensure only the user has access.\n*   **Referral Data:** Referrals are stored in a top-level `/referrals` collection, avoiding hierarchical dependencies. The `referrerId` and `referredUserId` are stored within each referral document, providing authorization independence.\n* **Shared Inbox:** Messages are stored in a top-level `/inbox_messages` collection for the shared inbox feature.\n\nThis structure facilitates simple and robust security rules by avoiding `get()` calls and enabling secure list operations (QAPs) by scoping user data under their respective user IDs and providing flat collections for referrals and inbox messages. The structure also supports invariants such as ensuring data integrity for ownership and timestamps."
   }
 }
-
-    

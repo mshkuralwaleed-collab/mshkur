@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MshkurLogo } from '@/lib/icons';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,6 +16,11 @@ import {
 import { useLanguage } from '@/context/language-context';
 import { translations } from '@/lib/locales';
 import { Languages } from 'lucide-react';
+import {
+  useUser,
+  useAuth,
+} from '@/firebase';
+import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -45,22 +50,31 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export default function Header() {
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const { user } = useUser();
+  const auth = useAuth();
   const userAvatar = PlaceHolderImages.find(p => p.id === 'avatar-1');
   const { language, setLanguage } = useLanguage();
   const t = translations[language];
 
   const handleSignIn = () => {
-    setIsSignedIn(true);
+    if (auth) {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider);
+    }
   };
 
   const handleSignOut = () => {
-    setIsSignedIn(false);
+    if (auth) {
+      signOut(auth);
+    }
   };
 
   const toggleLanguage = () => {
     setLanguage(prev => (prev === 'en' ? 'ar' : 'en'));
   };
+
+  const isSignedIn = !!user;
+  const avatarUrl = user?.photoURL || userAvatar?.imageUrl;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -83,11 +97,11 @@ export default function Header() {
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={userAvatar?.imageUrl}
+                        src={avatarUrl}
                         alt="User"
                         data-ai-hint={userAvatar?.imageHint}
                       />
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
@@ -95,10 +109,10 @@ export default function Header() {
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {t['ai-user']}
+                        {user?.displayName || t['ai-user']}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {t['user-email']}
+                        {user?.email || t['user-email']}
                       </p>
                     </div>
                   </DropdownMenuLabel>

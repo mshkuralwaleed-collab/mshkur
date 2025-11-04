@@ -7,6 +7,7 @@ import { LanguageProvider } from '@/context/language-context';
 export const metadata: Metadata = {
   title: 'Mshkur AI Studio',
   description: 'Create your professional digital card with the power of AI.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({

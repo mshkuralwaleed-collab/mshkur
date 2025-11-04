@@ -97,6 +97,126 @@
         "pointsSpent",
         "transactionDate"
       ]
+    },
+    "InboxMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Inbox Message",
+      "type": "object",
+      "description": "Represents a message within the shared inbox.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the message."
+        },
+        "userId": {
+          "type": "string",
+          "description": "ID of the user associated with the message (sender or recipient)."
+        },
+        "channel": {
+          "type": "string",
+          "description": "The communication channel (e.g., 'whatsapp', 'email')."
+        },
+        "content": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the message was sent or received."
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Flag indicating if the message has been read."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "channel",
+        "content",
+        "timestamp"
+      ]
+    },
+    "Post": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Post",
+      "type": "object",
+      "description": "Represents a social media post to be managed.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the post."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns this post."
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content of the post."
+        },
+        "scheduledAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The scheduled time for posting."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "scheduled",
+            "published"
+          ],
+          "description": "The current status of the post."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "content",
+        "status"
+      ]
+    },
+    "SocialMediaAccount": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Social Media Account",
+      "type": "object",
+      "description": "Represents a user's linked social media account.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the social media account link."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns this account link."
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "Twitter",
+            "LinkedIn",
+            "Facebook",
+            "Instagram"
+          ],
+          "description": "The social media platform."
+        },
+        "handle": {
+          "type": "string",
+          "description": "The user's handle or username on the platform."
+        },
+        "accessToken": {
+          "type": "string",
+          "description": "The OAuth access token for API access (should be encrypted)."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "platform",
+        "handle"
+      ]
     }
   },
   "auth": {
@@ -142,8 +262,66 @@
             }
           ]
         }
+      },
+      {
+        "path": "/inbox_messages/{messageId}",
+        "definition": {
+          "entityName": "InboxMessage",
+          "schema": {
+            "$ref": "#/backend/entities/InboxMessage"
+          },
+          "description": "Stores messages from various channels for the shared inbox feature.",
+          "params": [
+            {
+              "name": "messageId",
+              "description": "The unique ID of the message."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/posts/{postId}",
+        "definition": {
+          "entityName": "Post",
+          "schema": {
+            "$ref": "#/backend/entities/Post"
+          },
+          "description": "Stores user-created posts for social media management.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who owns the post."
+            },
+            {
+              "name": "postId",
+              "description": "The unique ID of the post."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/social_media_accounts/{accountId}",
+        "definition": {
+          "entityName": "SocialMediaAccount",
+          "schema": {
+            "$ref": "#/backend/entities/SocialMediaAccount"
+          },
+          "description": "Stores user's linked social media accounts.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who owns the account link."
+            },
+            {
+              "name": "accountId",
+              "description": "The unique ID of the linked account."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support the Mshkur AI Studio application, focusing on user-owned data and collaborative features like the viral referral system. Authorization Independence is achieved by storing user IDs directly within the `referrals` and `points` collections. \n\n*   **User Data Segregation:** User-specific data (points) is stored under `/users/{userId}` to ensure only the user has access.\n*   **Referral Data:** Referrals are stored in a top-level `/referrals` collection, avoiding hierarchical dependencies. The `referrerId` and `referredUserId` are stored within each referral document, providing authorization independence.\n\nThis structure facilitates simple and robust security rules by avoiding `get()` calls and enabling secure list operations (QAPs) by scoping user data under their respective user IDs and providing flat collections for referrals. The structure also supports invariants such as ensuring data integrity for ownership and timestamps."
+    "reasoning": "The Firestore structure is designed to support the Mshkur AI Studio application, focusing on user-owned data and collaborative features like the viral referral system. Authorization Independence is achieved by storing user IDs directly within the `referrals` and `points` collections. \n\n*   **User Data Segregation:** User-specific data (points, posts, social_media_accounts) is stored under `/users/{userId}` to ensure only the user has access.\n*   **Referral Data:** Referrals are stored in a top-level `/referrals` collection, avoiding hierarchical dependencies. The `referrerId` and `referredUserId` are stored within each referral document, providing authorization independence.\n* **Shared Inbox:** Messages are stored in a top-level `/inbox_messages` collection for the shared inbox feature.\n\nThis structure facilitates simple and robust security rules by avoiding `get()` calls and enabling secure list operations (QAPs) by scoping user data under their respective user IDs and providing flat collections for referrals and inbox messages. The structure also supports invariants such as ensuring data integrity for ownership and timestamps."
   }
 }
+
+    

@@ -43,6 +43,8 @@ import { dataExtractionAndBioGeneration } from '@/ai/flows/data-extraction-bio-g
 import { generateAndEnhanceLogo } from '@/ai/flows/ai-logo-generation-enhancement';
 import { generate3DBackground } from '@/ai/flows/dynamic-3d-background-generation';
 import { Label } from '@/components/ui/label';
+import { useLanguage } from '@/context/language-context';
+import { translations } from '@/lib/locales';
 
 type ControlPanelProps = {
   cardData: CardData;
@@ -58,24 +60,40 @@ export default function ControlPanel({
   const form = useForm({ defaultValues: cardData });
   const ocrForm = useForm<{ prompt: string; photoDataUri: string }>();
   const [extractedText, setExtractedText] = useState('');
+  const { language } = useLanguage();
+  const t = translations[language];
 
   const handleAIError = (feature: string, error: any) => {
     console.error(`${feature} Error:`, error);
     toast({
       variant: 'destructive',
       title: `AI Error: ${feature}`,
-      description: 'Something went wrong. Please check the console and try again.',
+      description:
+        'Something went wrong. Please check the console and try again.',
     });
   };
 
   const onCopilotSubmit = (data: { prompt: string }) => {
     startTransition(async () => {
       try {
-        const result = await aiCopilotInitialCardCreation({ prompt: data.prompt });
+        const result = await aiCopilotInitialCardCreation({
+          prompt: data.prompt,
+        });
         const parsedData = JSON.parse(result.cardData);
-        setCardData(prev => ({ ...prev, ...parsedData, skills: parsedData.skills || [] }));
-        form.reset({ ...cardData, ...parsedData, skills: parsedData.skills || [] });
-        toast({ title: 'AI Copilot Success', description: 'Your card has been updated by the AI.' });
+        setCardData(prev => ({
+          ...prev,
+          ...parsedData,
+          skills: parsedData.skills || [],
+        }));
+        form.reset({
+          ...cardData,
+          ...parsedData,
+          skills: parsedData.skills || [],
+        });
+        toast({
+          title: t['ai-copilot-success-title'],
+          description: t['ai-copilot-success-desc'],
+        });
       } catch (error) {
         handleAIError('Copilot', error);
       }
@@ -85,28 +103,44 @@ export default function ControlPanel({
   const handleOcrSubmit = () => {
     const photoDataUri = ocrForm.getValues('photoDataUri');
     if (!photoDataUri) {
-        toast({ variant: 'destructive', title: 'No image selected', description: 'Please upload a business card image.'});
-        return;
+      toast({
+        variant: 'destructive',
+        title: t['no-image-title'],
+        description: t['no-image-desc'],
+      });
+      return;
     }
     startTransition(async () => {
       try {
-        const { extractedData, bio } = await dataExtractionAndBioGeneration({ photoDataUri });
+        const { extractedData, bio } = await dataExtractionAndBioGeneration({
+          photoDataUri,
+        });
         setExtractedText(extractedData);
         setCardData(prev => ({ ...prev, bio }));
         form.setValue('bio', bio);
-        toast({ title: 'OCR Success', description: 'Data extracted and bio generated.'});
+        toast({
+          title: t['ocr-success-title'],
+          description: t['ocr-success-desc'],
+        });
       } catch (error) {
         handleAIError('OCR', error);
       }
     });
   };
-  
-  const onLogoSubmit = (data: { brandName: string; logoStyle: string; logoColors: string; }) => {
+
+  const onLogoSubmit = (data: {
+    brandName: string;
+    logoStyle: string;
+    logoColors: string;
+  }) => {
     startTransition(async () => {
       try {
         const { enhancedLogo } = await generateAndEnhanceLogo(data);
-        setCardData(prev => ({...prev, logoUrl: enhancedLogo}));
-        toast({ title: 'Logo Generated', description: 'Your new logo is ready.'});
+        setCardData(prev => ({ ...prev, logoUrl: enhancedLogo }));
+        toast({
+          title: t['logo-generated-title'],
+          description: t['logo-generated-desc'],
+        });
       } catch (error) {
         handleAIError('Logo Generation', error);
       }
@@ -117,8 +151,11 @@ export default function ControlPanel({
     startTransition(async () => {
       try {
         const { videoDataUri } = await generate3DBackground(data);
-        setCardData(prev => ({...prev, backgroundUrl: videoDataUri}));
-        toast({ title: 'Background Generated', description: 'Your new 3D background is ready.'});
+        setCardData(prev => ({ ...prev, backgroundUrl: videoDataUri }));
+        toast({
+          title: t['background-generated-title'],
+          description: t['background-generated-desc'],
+        });
       } catch (error) {
         handleAIError('Background Generation', error);
       }
@@ -139,39 +176,58 @@ export default function ControlPanel({
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle>AI Studio</CardTitle>
-        <CardDescription>
-          Use AI to create and customize your digital card.
-        </CardDescription>
+        <CardTitle>{t['ai-studio']}</CardTitle>
+        <CardDescription>{t['ai-studio-desc']}</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="copilot">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="copilot"><Bot className="h-4 w-4" /></TabsTrigger>
-            <TabsTrigger value="details"><ScanLine className="h-4 w-4" /></TabsTrigger>
-            <TabsTrigger value="logo"><Palette className="h-4 w-4" /></TabsTrigger>
-            <TabsTrigger value="background"><Film className="h-4 w-4" /></TabsTrigger>
+            <TabsTrigger value="copilot">
+              <Bot className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="details">
+              <ScanLine className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="logo">
+              <Palette className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="background">
+              <Film className="h-4 w-4" />
+            </TabsTrigger>
           </TabsList>
-          
+
           {/* AI Copilot Tab */}
           <TabsContent value="copilot">
-            <Form {...useForm<{prompt: string}>()}>
-              <form onSubmit={useForm<{prompt: string}>().handleSubmit(onCopilotSubmit)} className="space-y-4 pt-4">
+            <Form {...useForm<{ prompt: string }>()}>
+              <form
+                onSubmit={useForm<{ prompt: string }>().handleSubmit(
+                  onCopilotSubmit
+                )}
+                className="space-y-4 pt-4"
+              >
                 <FormField
                   name="prompt"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>AI Copilot Prompt</FormLabel>
+                      <FormLabel>{t['copilot-prompt-label']}</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="e.g., 'I'm a software engineer specializing in AI. Create a professional digital card for me.'" {...field} rows={4} />
+                        <Textarea
+                          placeholder={t['copilot-prompt-placeholder']}
+                          {...field}
+                          rows={4}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <Button type="submit" disabled={isPending} className="w-full">
-                  {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                  Generate with AI
+                  {isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
+                  )}
+                  {t['generate-with-ai']}
                 </Button>
               </form>
             </Form>
@@ -180,55 +236,105 @@ export default function ControlPanel({
           {/* Details & OCR Tab */}
           <TabsContent value="details">
             <div className="space-y-4 pt-4">
-                 <div className="space-y-2">
-                    <Label htmlFor="ocr-file">Extract from Business Card (OCR)</Label>
-                    <div className="flex gap-2">
-                        <Input id="ocr-file" type="file" accept="image/*" onChange={handleFileChange} className="flex-grow"/>
-                        <Button onClick={handleOcrSubmit} disabled={isPending} variant="secondary">
-                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4"/>}
-                        </Button>
-                    </div>
+              <div className="space-y-2">
+                <Label htmlFor="ocr-file">{t['ocr-label']}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="ocr-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="flex-grow"
+                  />
+                  <Button
+                    onClick={handleOcrSubmit}
+                    disabled={isPending}
+                    variant="secondary"
+                  >
+                    {isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
-                 {extractedText && (
-                    <Textarea value={extractedText} readOnly rows={5} placeholder="Extracted text will appear here..." />
-                 )}
+              </div>
+              {extractedText && (
+                <Textarea
+                  value={extractedText}
+                  readOnly
+                  rows={5}
+                  placeholder={t['ocr-placeholder']}
+                />
+              )}
             </div>
           </TabsContent>
-          
+
           {/* Logo Tab */}
           <TabsContent value="logo">
-            <Form {...useForm({ defaultValues: { brandName: cardData.name, logoStyle: 'minimalist', logoColors: 'blue and white' }})}>
-              <form onSubmit={useForm<{brandName: string, logoStyle: string, logoColors: string}>().handleSubmit(onLogoSubmit)} className="space-y-4 pt-4">
-                 <FormField
+            <Form
+              {...useForm({
+                defaultValues: {
+                  brandName: cardData.name,
+                  logoStyle: 'minimalist',
+                  logoColors: 'blue and white',
+                },
+              })}
+            >
+              <form
+                onSubmit={useForm<{
+                  brandName: string;
+                  logoStyle: string;
+                  logoColors: string;
+                }>().handleSubmit(onLogoSubmit)}
+                className="space-y-4 pt-4"
+              >
+                <FormField
                   name="brandName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Brand Name</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <FormLabel>{t['brand-name-label']}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
                     </FormItem>
                   )}
                 />
-                 <FormField
+                <FormField
                   name="logoStyle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Logo Style</FormLabel>
-                      <FormControl><Input placeholder="e.g., minimalist, abstract" {...field} /></FormControl>
+                      <FormLabel>{t['logo-style-label']}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t['logo-style-placeholder']}
+                          {...field}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />
-                 <FormField
+                <FormField
                   name="logoColors"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Logo Colors</FormLabel>
-                      <FormControl><Input placeholder="e.g., gold and white" {...field} /></FormControl>
+                      <FormLabel>{t['logo-colors-label']}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t['logo-colors-placeholder']}
+                          {...field}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />
                 <Button type="submit" disabled={isPending} className="w-full">
-                  {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImageIcon className="mr-2 h-4 w-4" />}
-                  Generate Logo
+                  {isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImageIcon className="mr-2 h-4 w-4" />
+                  )}
+                  {t['generate-logo-button']}
                 </Button>
               </form>
             </Form>
@@ -236,28 +342,40 @@ export default function ControlPanel({
 
           {/* Background Tab */}
           <TabsContent value="background">
-             <Form {...useForm<{prompt: string}>()}>
-              <form onSubmit={useForm<{prompt: string}>().handleSubmit(onBackgroundSubmit)} className="space-y-4 pt-4">
+            <Form {...useForm<{ prompt: string }>()}>
+              <form
+                onSubmit={useForm<{ prompt: string }>().handleSubmit(
+                  onBackgroundSubmit
+                )}
+                className="space-y-4 pt-4"
+              >
                 <FormField
                   name="prompt"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>3D Background Prompt</FormLabel>
+                      <FormLabel>{t['background-prompt-label']}</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="e.g., 'Calm, dark 4K video with flowing blue and green neon lines in a 3D pattern.'" {...field} rows={3} />
+                        <Textarea
+                          placeholder={t['background-prompt-placeholder']}
+                          {...field}
+                          rows={3}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <Button type="submit" disabled={isPending} className="w-full">
-                  {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                  Generate Background
+                  {isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
+                  )}
+                  {t['generate-background-button']}
                 </Button>
               </form>
             </Form>
           </TabsContent>
-
         </Tabs>
       </CardContent>
     </Card>

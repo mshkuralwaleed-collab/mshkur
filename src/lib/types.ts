@@ -12,3 +12,5 @@ export type CardData = {
   backgroundUrl: string;
   avatarUrl: string;
 };
+
+export type Language = 'en' | 'ar';

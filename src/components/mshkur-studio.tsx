@@ -1,17 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { CardData } from '@/lib/types';
 import ControlPanel from '@/components/studio/control-panel';
 import CardPreview from '@/components/studio/card-preview';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useLanguage } from '@/context/language-context';
 import { translations } from '@/lib/locales';
+import { useUser } from '@/firebase';
 
 export default function MshkurStudio() {
   const userAvatar = PlaceHolderImages.find(p => p.id === 'avatar-1');
   const { language } = useLanguage();
   const t = translations[language];
+  const { user } = useUser();
 
   const [cardData, setCardData] = useState<CardData>({
     name: t['card-name'],
@@ -33,6 +35,20 @@ export default function MshkurStudio() {
     backgroundUrl: '',
     avatarUrl: userAvatar?.imageUrl || '',
   });
+
+  useEffect(() => {
+    if (user) {
+      setCardData(prev => ({
+        ...prev,
+        name: user.displayName || prev.name,
+        avatarUrl: user.photoURL || prev.avatarUrl,
+        contact: {
+          ...prev.contact,
+          email: user.email || prev.contact.email,
+        },
+      }));
+    }
+  }, [user]);
 
   return (
     <div

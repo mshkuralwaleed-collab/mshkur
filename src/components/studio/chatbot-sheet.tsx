@@ -41,11 +41,12 @@ export default function ChatbotSheet({
   const { language } = useLanguage();
   const t = translations[language];
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
+    if (viewportRef.current) {
+      viewportRef.current.scrollTo({
+        top: viewportRef.current.scrollHeight,
         behavior: 'smooth',
       });
     }
@@ -85,7 +86,7 @@ export default function ChatbotSheet({
           <SheetTitle>{t['chatbot-title']}</SheetTitle>
           <SheetDescription>{t['chatbot-desc']}</SheetDescription>
         </SheetHeader>
-        <ScrollArea className="flex-1 pr-4 -mr-6" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 pr-4 -mr-6" ref={scrollAreaRef} viewportRef={viewportRef}>
           <div className="space-y-4 py-4">
             {messages.map((message, index) => (
               <div

@@ -102,6 +102,14 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if false; // Protect templates from modification
     }
+    
+    /**
+     * @description Rewards are public, but not writable for now.
+     */
+    match /rewards/{rewardId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false; // Protect rewards from modification
+    }
 
 
     // --- Helper Functions ---
@@ -127,4 +135,5 @@ service cloud.firestore {
     }
   }
 }
+
     

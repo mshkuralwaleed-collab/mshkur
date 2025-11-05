@@ -1,5 +1,38 @@
 {
   "entities": {
+    "Reward": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Reward",
+      "type": "object",
+      "description": "Represents a reward that can be redeemed with points.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the reward."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the reward."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the reward."
+        },
+        "pointsCost": {
+          "type": "number",
+          "description": "The number of points required to redeem the reward."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "A URL for an image of the reward."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "pointsCost"
+      ]
+    },
     "Referral": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Referral",
@@ -449,6 +482,22 @@
         }
       },
       {
+        "path": "/rewards/{rewardId}",
+        "definition": {
+          "entityName": "Reward",
+          "schema": {
+            "$ref": "#/backend/entities/Reward"
+          },
+          "description": "Stores publicly available rewards that can be redeemed with points.",
+          "params": [
+            {
+              "name": "rewardId",
+              "description": "The unique ID of the reward."
+            }
+          ]
+        }
+      },
+      {
         "path": "/users/{userId}/analytics/{analyticId}",
         "definition": {
           "entityName": "Analytics",
@@ -489,7 +538,7 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support the Mshkur AI Studio application, focusing on user-owned data and collaborative features like the viral referral system. Authorization Independence is achieved by storing user IDs directly within the `referrals` and `points` collections. \n\n*   **User Data Segregation:** User-specific data (points, posts, social_media_accounts, analytics, ai_usage) is stored under `/users/{userId}` to ensure only the user has access.\n*   **Referral Data:** Referrals are stored in a top-level `/referrals` collection, avoiding hierarchical dependencies. The `referrerId` and `referredUserId` are stored within each referral document, providing authorization independence.\n* **Shared Inbox:** Messages are stored in a top-level `/inbox_messages` collection for the shared inbox feature.\n* **Public Templates:** Templates are stored in a top-level `/templates` collection, making them publicly readable.\n\nThis structure facilitates simple and robust security rules by avoiding `get()` calls and enabling secure list operations (QAPs) by scoping user data under their respective user IDs and providing flat collections for public or semi-public data."
+    "reasoning": "The Firestore structure is designed to support the Mshkur AI Studio application, focusing on user-owned data and collaborative features like the viral referral system. Authorization Independence is achieved by storing user IDs directly within the `referrals` and `points` collections. \n\n*   **User Data Segregation:** User-specific data (points, posts, social_media_accounts, analytics, ai_usage) is stored under `/users/{userId}` to ensure only the user has access.\n*   **Referral Data:** Referrals are stored in a top-level `/referrals` collection, avoiding hierarchical dependencies. The `referrerId` and `referredUserId` are stored within each referral document, providing authorization independence.\n* **Shared Inbox:** Messages are stored in a top-level `/inbox_messages` collection for the shared inbox feature.\n* **Public Templates & Rewards:** Templates and Rewards are stored in top-level collections (`/templates`, `/rewards`) to make them publicly readable.\n\nThis structure facilitates simple and robust security rules by avoiding `get()` calls and enabling secure list operations (QAPs) by scoping user data under their respective user IDs and providing flat collections for public or semi-public data."
   }
 }
 

@@ -94,7 +94,7 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
 
   return (
     <>
-    <div className="sticky top-20" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="sticky top-20">
       <Card className="overflow-hidden shadow-lg w-full max-w-md mx-auto aspect-[9/16] max-h-[85vh]">
         <div className="relative h-full w-full">
           {cardData.backgroundUrl ? (

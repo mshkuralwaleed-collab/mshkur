@@ -35,6 +35,7 @@ export default function RootLayout({
               href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap"
               rel="stylesheet"
             />
+            <meta name="theme-color" content="#2B3035" />
           </head>
           <body className={cn('font-body antialiased')}>
             {children}

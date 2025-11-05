@@ -29,7 +29,20 @@ const prompt = ai.definePrompt({
   name: 'aiCopilotInitialCardCreationPrompt',
   input: {schema: AICopilotInitialCardCreationInputSchema},
   output: {schema: AICopilotInitialCardCreationOutputSchema},
-  prompt: `You are an AI copilot specializing in creating professional digital business cards. Based on the user's prompt, generate a JSON object containing the digital business card data, including name, title, contact information, a professional bio, and a list of relevant skills.
+  prompt: `You are an AI copilot specializing in creating professional digital business cards. Based on the user's prompt, generate a JSON object containing the digital business card data.
+
+The JSON should have the following structure:
+{
+  "name": "Full Name",
+  "title": "Job Title",
+  "contact": {
+    "email": "email@example.com",
+    "phone": "+1234567890",
+    "website": "example.com"
+  },
+  "bio": "A short professional biography.",
+  "skills": ["Skill 1", "Skill 2", "Skill 3"]
+}
 
 User Prompt: {{{prompt}}}
 

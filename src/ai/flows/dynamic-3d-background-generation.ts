@@ -47,7 +47,7 @@ const generate3DBackgroundFlow = ai.defineFlow(
   async input => {
     // Generate the video using the Veo model.
     let {operation} = await ai.generate({
-      model: 'googleai/veo-2.0-generate-001',
+      model: ai.textToVideoModel,
       prompt: input.prompt,
       config: {
         durationSeconds: 5,

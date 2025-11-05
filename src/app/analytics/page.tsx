@@ -4,19 +4,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import Header from '@/components/layout/header';
 import { useLanguage } from '@/context/language-context';
 import { translations } from '@/lib/locales';
-import { useUser, useCollection, useFirestore, useAuth } from '@/firebase';
+import { useUser } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useAuth as useFirebaseAuth } from '@/firebase/provider'; // Renamed to avoid conflict
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Eye, Share2, BarChart2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useEffect, useMemo } from 'react';
-import type { Analytics, MonthlyAnalytics } from '@/lib/types';
-import { collection, query, where, Timestamp } from 'firebase/firestore';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { format, getMonth } from 'date-fns';
-
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -45,74 +39,22 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
   );
 
+// Mock data - replace with actual data fetching
+const data = [
+    { name: 'Jan', views: 400, shares: 240 },
+    { name: 'Feb', views: 300, shares: 139 },
+    { name: 'Mar', views: 200, shares: 980 },
+    { name: 'Apr', views: 278, shares: 390 },
+    { name: 'May', views: 189, shares: 480 },
+    { name: 'Jun', views: 239, shares: 380 },
+    { name: 'Jul', views: 349, shares: 430 },
+];
+
 export default function AnalyticsPage() {
   const { language } = useLanguage();
   const t = translations[language];
   const { user, isUserLoading } = useUser();
   const auth = useFirebaseAuth();
-  const firestore = useFirestore();
-  
-  const analyticsQuery = user
-    ? query(collection(firestore, 'users', user.uid, 'analytics'))
-    : null;
-    
-  const { data: analyticsData, isLoading: isAnalyticsLoading } = useCollection<Analytics>(analyticsQuery);
-
-  useEffect(() => {
-    const seedData = async () => {
-        if (firestore && user) {
-            const seeded = sessionStorage.getItem(`analytics_seeded_${user.uid}`);
-            if (!seeded) {
-                const now = new Date();
-                const sampleEvents: Omit<Analytics, 'id'>[] = [
-                    { eventType: 'cardView', timestamp: Timestamp.fromDate(new Date(now.getFullYear(), now.getMonth(), 1)) },
-                    { eventType: 'share', timestamp: Timestamp.fromDate(new Date(now.getFullYear(), now.getMonth(), 5)) },
-                    { eventType: 'cardView', timestamp: Timestamp.fromDate(new Date(now.getFullYear(), now.getMonth() - 1, 3)) },
-                ];
-
-                const analyticsCollection = collection(firestore, 'users', user.uid, 'analytics');
-                sampleEvents.forEach(event => {
-                    addDocumentNonBlocking(analyticsCollection, event);
-                });
-                
-                sessionStorage.setItem(`analytics_seeded_${user.uid}`, 'true');
-            }
-        }
-    };
-    if (!isUserLoading && user) {
-      seedData();
-    }
-  }, [firestore, user, isUserLoading]);
-
-  const { monthlyData, totalViews, totalShares } = useMemo(() => {
-    if (!analyticsData) {
-      return { monthlyData: [], totalViews: 0, totalShares: 0 };
-    }
-
-    const totals = {
-      totalViews: analyticsData.filter(a => a.eventType === 'cardView').length,
-      totalShares: analyticsData.filter(a => a.eventType === 'share').length,
-    }
-
-    const groupedData: MonthlyAnalytics[] = Array.from({ length: 12 }, (_, i) => ({
-      name: format(new Date(0, i), 'MMM'),
-      views: 0,
-      shares: 0,
-    }));
-
-    analyticsData.forEach(event => {
-      const date = (event.timestamp as Timestamp).toDate();
-      const monthIndex = getMonth(date);
-      if (event.eventType === 'cardView') {
-        groupedData[monthIndex].views++;
-      } else if (event.eventType === 'share') {
-        groupedData[monthIndex].shares++;
-      }
-    });
-
-    return { monthlyData: groupedData, ...totals };
-  }, [analyticsData]);
-
 
   const handleSignIn = () => {
     if (auth) {
@@ -121,10 +63,8 @@ export default function AnalyticsPage() {
     }
   };
 
-  const isLoading = isUserLoading || (user && isAnalyticsLoading);
-
   const renderContent = () => {
-    if (isLoading) {
+    if (isUserLoading) {
         return (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -168,8 +108,8 @@ export default function AnalyticsPage() {
                         <Eye className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{totalViews.toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground">Total views all time</p>
+                        <div className="text-2xl font-bold">5,678</div>
+                        <p className="text-xs text-muted-foreground">+15% from last month</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -178,8 +118,8 @@ export default function AnalyticsPage() {
                         <Share2 className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{totalShares.toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground">Total shares all time</p>
+                        <div className="text-2xl font-bold">890</div>
+                        <p className="text-xs text-muted-foreground">+10% from last month</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -197,21 +137,20 @@ export default function AnalyticsPage() {
             <Card className="mt-6">
                 <CardHeader>
                     <CardTitle>Engagement Overview</CardTitle>
-                    <CardDescription>A chart showing card views and shares over time.</CardDescription>
+                    <CardContent className="h-80">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="views" fill="hsl(var(--primary))" />
+                            <Bar dataKey="shares" fill="hsl(var(--accent))" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
                 </CardHeader>
-                <CardContent className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={monthlyData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="views" fill="hsl(var(--primary))" />
-                        <Bar dataKey="shares" fill="hsl(var(--accent))" />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </CardContent>
             </Card>
         </>
       )

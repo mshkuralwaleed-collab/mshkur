@@ -57,9 +57,9 @@ export default function ControlPanel({
 }: ControlPanelProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  
-  const copilotForm = useForm<{ prompt: string }>();
+
   const ocrForm = useForm<{ photoDataUri: string }>();
+  const copilotForm = useForm<{ prompt: string }>();
   const logoForm = useForm({
     defaultValues: {
       brandName: cardData.name,
@@ -68,7 +68,7 @@ export default function ControlPanel({
     },
   });
   const backgroundForm = useForm<{ prompt: string }>();
-  
+
   const [extractedText, setExtractedText] = useState('');
   const { language } = useLanguage();
   const t = translations[language];
@@ -90,10 +90,22 @@ export default function ControlPanel({
           prompt: data.prompt,
         });
         const parsedData = JSON.parse(result.cardData);
-        const newCardData = {
-          ...cardData,
-          ...parsedData,
-          skills: parsedData.skills || [],
+        // Ensure that all expected fields are present, providing defaults if not
+        const newCardData: CardData = {
+          name: parsedData.name || cardData.name,
+          title: parsedData.title || cardData.title,
+          contact: {
+            email: parsedData.contact?.email || cardData.contact.email,
+            phone: parsedData.contact?.phone || cardData.contact.phone,
+            website: parsedData.contact?.website || cardData.contact.website,
+          },
+          bio: parsedData.bio || cardData.bio,
+          skills: Array.isArray(parsedData.skills)
+            ? parsedData.skills
+            : cardData.skills,
+          logoUrl: cardData.logoUrl, // Preserve existing images
+          backgroundUrl: cardData.backgroundUrl,
+          avatarUrl: cardData.avatarUrl,
         };
         setCardData(newCardData);
         toast({
@@ -377,5 +389,3 @@ export default function ControlPanel({
     </Card>
   );
 }
-
-    

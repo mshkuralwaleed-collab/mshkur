@@ -9,14 +9,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  AtSign,
-  Globe,
   Mail,
   MessageCircle,
   Phone,
   Save,
-  Share2,
-  User,
+  Globe,
 } from 'lucide-react';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { User } from 'lucide-react';
 
 
 type CardPreviewProps = {

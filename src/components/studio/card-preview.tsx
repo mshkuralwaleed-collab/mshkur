@@ -113,7 +113,7 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
 
           <div className="absolute inset-0 bg-black/40"></div>
 
-          <CardContent className="relative z-10 flex h-full flex-col justify-between p-6 text-white overflow-y-auto">
+          <CardContent className="relative z-10 flex h-full flex-col justify-between p-6 text-white">
             <div className="flex items-start justify-between">
               {cardData.logoUrl ? (
                 <Image
@@ -162,24 +162,27 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
                 </div>
               </TooltipProvider>
             </div>
-
-            <div className="flex flex-col items-center text-center">
-              <Avatar className="h-24 w-24 border-4 border-white/80 shadow-lg md:h-28 md:w-28">
-                <AvatarImage src={cardData.avatarUrl} data-ai-hint="person portrait"/>
-                <AvatarFallback>
-                  <User className="h-10 w-10" />
-                </AvatarFallback>
-              </Avatar>
-              <h1 className="mt-4 font-headline text-3xl font-bold tracking-tight md:text-4xl">
-                {cardData.name}
-              </h1>
-              <h2 className="mt-1 text-lg font-medium text-primary md:text-xl">
-                {cardData.title}
-              </h2>
-              <p className="mt-4 max-w-sm text-sm text-white/80">
-                {cardData.bio}
-              </p>
+            
+            <div className="flex-1 overflow-y-auto py-4 no-scrollbar">
+              <div className="flex flex-col items-center text-center">
+                <Avatar className="h-24 w-24 border-4 border-white/80 shadow-lg md:h-28 md:w-28">
+                  <AvatarImage src={cardData.avatarUrl} data-ai-hint="person portrait"/>
+                  <AvatarFallback>
+                    <User className="h-10 w-10" />
+                  </AvatarFallback>
+                </Avatar>
+                <h1 className="mt-4 font-headline text-3xl font-bold tracking-tight md:text-4xl">
+                  {cardData.name}
+                </h1>
+                <h2 className="mt-1 text-lg font-medium text-primary md:text-xl">
+                  {cardData.title}
+                </h2>
+                <p className="mt-4 max-w-sm text-sm text-white/80">
+                  {cardData.bio}
+                </p>
+              </div>
             </div>
+
 
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-center gap-2">

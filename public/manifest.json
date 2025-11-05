@@ -1,7 +1,7 @@
 {
   "name": "Mshkur AI Studio",
   "short_name": "Mshkur AI",
-  "description": "Create your professional digital card with the power of AI.",
+  "description": "Create a professional digital business card with customizable fields, powered by Google Gemini.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#2B3035",

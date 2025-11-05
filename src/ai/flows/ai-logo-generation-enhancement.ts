@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview AI-powered logo generation and enhancement flow.
@@ -44,7 +45,11 @@ const generateLogoPrompt = ai.definePrompt({
   name: 'generateLogoPrompt',
   input: {schema: AILogoInputSchema},
   output: {schema: z.string().describe('Base64 encoded data URI of the generated logo image.')},
-  prompt: `You are an AI logo generation expert. Generate an abstract logo for the brand "{{{brandName}}}". The logo should be in the style of "{{{logoStyle}}}" and use the colors "{{{logoColors}}}". Return the logo as a base64 encoded data URI.`,
+  prompt: `You are an expert logo designer. Create a visually appealing and abstract logo for a brand named "{{{brandName}}}".
+
+The desired style is "{{{logoStyle}}}" and the color scheme should be "{{{logoColors}}}".
+
+The logo should be on a transparent background. Return the final logo as a base64 encoded data URI.`,
 });
 
 const enhanceLogoPrompt = ai.definePrompt({
@@ -58,11 +63,19 @@ const enhanceLogoPrompt = ai.definePrompt({
           .describe('Base64 encoded data URI of the enhanced 8K logo image.'),
         description: z
           .string()
-          .describe('A description of the logo and its design elements.'),
+          .describe('A detailed description of the logo, its symbolism, and design elements.'),
       })
       .passthrough(),
   },
-  prompt: `You are an AI image enhancement expert. Enhance the quality of the given logo image ({{{media url=initialLogo}}}) to 8K resolution. Provide a description of the logo and its design elements. Return the enhanced logo as a base64 encoded data URI and the description. The response MUST be a JSON object with "enhancedLogo" and "description" fields.`,
+  prompt: `You are a world-class AI image enhancement specialist and art director. You will be given a logo image. Your task is to perform two actions:
+
+1.  **Enhance:** Upscale the provided logo image ({{{media url=initialLogo}}}) to the highest possible quality (8K resolution). The final image must have a transparent background.
+2.  **Describe:** Write a brief, compelling description of the logo's design, symbolism, and aesthetic.
+
+Return a valid JSON object containing two fields:
+- "enhancedLogo": The base64 encoded data URI of the final, enhanced logo image.
+- "description": The detailed description of the logo.
+`,
 });
 
 const aiLogoGenerationAndEnhancementFlow = ai.defineFlow(

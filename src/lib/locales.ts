@@ -46,6 +46,7 @@ export const translations = {
     'no-rewards-message': 'No rewards available at the moment. Check back soon!',
     'points-label': 'Points',
     'redeem-button': 'Redeem',
+    'sign-in-to-view-rewards': 'Please sign in to view available rewards.',
   },
   ar: {
     'mshkur-ai-studio': 'استوديو مشكور للذكاء الاصطناعي',
@@ -95,5 +96,6 @@ export const translations = {
     'no-rewards-message': 'لا توجد مكافآت متاحة في الوقت الحالي. تحقق مرة أخرى قريبًا!',
     'points-label': 'نقاط',
     'redeem-button': 'استبدال',
+    'sign-in-to-view-rewards': 'يرجى تسجيل الدخول لعرض المكافآت المتاحة.',
   },
 };

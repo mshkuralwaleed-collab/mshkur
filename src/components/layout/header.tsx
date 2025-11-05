@@ -15,12 +15,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/context/language-context';
 import { translations } from '@/lib/locales';
-import { Languages } from 'lucide-react';
+import { Languages, Gift } from 'lucide-react';
 import {
   useUser,
   useAuth,
 } from '@/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import Link from 'next/link';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -80,8 +81,10 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
-          <MshkurLogo className="mr-2 h-6 w-6 text-primary" />
-          <span className="font-bold">{t['mshkur-ai-studio']}</span>
+          <Link href="/" className="flex items-center">
+            <MshkurLogo className="mr-2 h-6 w-6 text-primary" />
+            <span className="font-bold">{t['mshkur-ai-studio']}</span>
+          </Link>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <Button variant="ghost" size="icon" onClick={toggleLanguage}>
@@ -116,6 +119,13 @@ export default function Header() {
                       </p>
                     </div>
                   </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/rewards">
+                      <Gift className="mr-2 h-4 w-4" />
+                      <span>{t['rewards-title']}</span>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     {t['log-out']}

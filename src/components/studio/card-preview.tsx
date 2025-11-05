@@ -122,13 +122,13 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
               )}
                <div className="flex items-center gap-2">
                 <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={() => setIsChatbotOpen(true)}>
-                    <MessageCircle className="h-5 w-5" />
+                    <MessageCircle className="h-6 w-6" />
                 </Button>
                 <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={handleWhatsAppShare}>
-                    <WhatsAppIcon className="h-5 w-5" />
+                    <WhatsAppIcon className="h-6 w-6" />
                 </Button>
                 <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={handleSaveContact}>
-                    <Save className="h-5 w-5" />
+                    <Save className="h-6 w-6" />
                 </Button>
             </div>
             </div>

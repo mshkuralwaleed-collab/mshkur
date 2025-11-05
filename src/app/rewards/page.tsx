@@ -10,7 +10,7 @@ import { useLanguage } from '@/context/language-context';
 import { translations } from '@/lib/locales';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect } from 'react';
-import { addDocumentNonBlocking } from '@/firebase';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';

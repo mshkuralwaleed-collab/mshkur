@@ -59,7 +59,7 @@ export default function ControlPanel({
   const { toast } = useToast();
 
   const ocrForm = useForm<{ photoDataUri: string }>();
-  const copilotForm = useForm<{ prompt: string }>();
+  const [copilotPrompt, setCopilotPrompt] = useState('');
   const logoForm = useForm({
     defaultValues: {
       brandName: cardData.name,
@@ -83,11 +83,14 @@ export default function ControlPanel({
     });
   };
 
-  const onCopilotSubmit = (data: { prompt: string }) => {
+  const onCopilotSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!copilotPrompt.trim()) return;
+
     startTransition(async () => {
       try {
         const result = await aiCopilotInitialCardCreation({
-          prompt: data.prompt,
+          prompt: copilotPrompt,
         });
         const parsedData = JSON.parse(result.cardData);
         // Ensure that all expected fields are present, providing defaults if not
@@ -215,38 +218,29 @@ export default function ControlPanel({
 
           {/* AI Copilot Tab */}
           <TabsContent value="copilot">
-            <Form {...copilotForm}>
-              <form
-                onSubmit={copilotForm.handleSubmit(onCopilotSubmit)}
-                className="space-y-4 pt-4"
-              >
-                <FormField
-                  control={copilotForm.control}
-                  name="prompt"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t['copilot-prompt-label']}</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder={t['copilot-prompt-placeholder']}
-                          {...field}
-                          rows={4}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <form
+              onSubmit={onCopilotSubmit}
+              className="space-y-4 pt-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="copilot-prompt">{t['copilot-prompt-label']}</Label>
+                <Textarea
+                  id="copilot-prompt"
+                  placeholder={t['copilot-prompt-placeholder']}
+                  value={copilotPrompt}
+                  onChange={(e) => setCopilotPrompt(e.target.value)}
+                  rows={4}
                 />
-                <Button type="submit" disabled={isPending} className="w-full">
-                  {isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="mr-2 h-4 w-4" />
-                  )}
-                  {t['generate-with-ai']}
-                </Button>
-              </form>
-            </Form>
+              </div>
+              <Button type="submit" disabled={isPending} className="w-full">
+                {isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2 h-4 w-4" />
+                )}
+                {t['generate-with-ai']}
+              </Button>
+            </form>
           </TabsContent>
 
           {/* Details & OCR Tab */}

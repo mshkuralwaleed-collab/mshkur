@@ -217,6 +217,120 @@
         "platform",
         "handle"
       ]
+    },
+    "Template": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Template",
+      "type": "object",
+      "description": "Represents a design template for a digital card.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the template."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the template."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the template."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL for a preview image of the template."
+        },
+        "styleData": {
+          "type": "object",
+          "description": "A JSON object containing the styling information for the template."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "styleData"
+      ]
+    },
+    "Analytics": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Analytics",
+      "type": "object",
+      "description": "Represents an analytics event for a user's card.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the analytics event."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user whose card generated the event."
+        },
+        "eventType": {
+          "type": "string",
+          "enum": [
+            "cardView",
+            "linkClick",
+            "share"
+          ],
+          "description": "The type of event that occurred."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the event occurred."
+        },
+        "details": {
+          "type": "object",
+          "description": "Additional details about the event (e.g., which link was clicked)."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "eventType",
+        "timestamp"
+      ]
+    },
+    "AIUsage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AI Usage",
+      "type": "object",
+      "description": "Represents a record of AI feature usage by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AI usage record."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who used the AI feature."
+        },
+        "feature": {
+          "type": "string",
+          "enum": [
+            "copilot",
+            "ocr",
+            "logo",
+            "background"
+          ],
+          "description": "The AI feature that was used."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the feature was used."
+        },
+        "creditsConsumed": {
+          "type": "number",
+          "description": "The number of AI credits consumed by the operation."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "feature",
+        "timestamp"
+      ]
     }
   },
   "auth": {
@@ -280,7 +394,7 @@
       },
       {
         "path": "/users/{userId}/posts/{postId}",
-        "definition": a{
+        "definition": {
           "entityName": "Post",
           "schema": {
             "$ref": "#/backend/entities/Post"
@@ -317,8 +431,66 @@
             }
           ]
         }
+      },
+      {
+        "path": "/templates/{templateId}",
+        "definition": {
+          "entityName": "Template",
+          "schema": {
+            "$ref": "#/backend/entities/Template"
+          },
+          "description": "Stores publicly available card templates.",
+          "params": [
+            {
+              "name": "templateId",
+              "description": "The unique ID of the template."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/analytics/{analyticId}",
+        "definition": {
+          "entityName": "Analytics",
+          "schema": {
+            "$ref": "#/backend/entities/Analytics"
+          },
+          "description": "Stores analytics events for a user's card.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who owns the card."
+            },
+            {
+              "name": "analyticId",
+              "description": "The unique ID of the analytics event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/ai_usage/{usageId}",
+        "definition": {
+          "entityName": "AIUsage",
+          "schema": {
+            "$ref": "#/backend/entities/AIUsage"
+          },
+          "description": "Stores records of AI feature usage for a user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who used the feature."
+            },
+            {
+              "name": "usageId",
+              "description": "The unique ID of the usage record."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support the Mshkur AI Studio application, focusing on user-owned data and collaborative features like the viral referral system. Authorization Independence is achieved by storing user IDs directly within the `referrals` and `points` collections. \n\n*   **User Data Segregation:** User-specific data (points, posts, social_media_accounts) is stored under `/users/{userId}` to ensure only the user has access.\n*   **Referral Data:** Referrals are stored in a top-level `/referrals` collection, avoiding hierarchical dependencies. The `referrerId` and `referredUserId` are stored within each referral document, providing authorization independence.\n* **Shared Inbox:** Messages are stored in a top-level `/inbox_messages` collection for the shared inbox feature.\n\nThis structure facilitates simple and robust security rules by avoiding `get()` calls and enabling secure list operations (QAPs) by scoping user data under their respective user IDs and providing flat collections for referrals and inbox messages. The structure also supports invariants such as ensuring data integrity for ownership and timestamps."
+    "reasoning": "The Firestore structure is designed to support the Mshkur AI Studio application, focusing on user-owned data and collaborative features like the viral referral system. Authorization Independence is achieved by storing user IDs directly within the `referrals` and `points` collections. \n\n*   **User Data Segregation:** User-specific data (points, posts, social_media_accounts, analytics, ai_usage) is stored under `/users/{userId}` to ensure only the user has access.\n*   **Referral Data:** Referrals are stored in a top-level `/referrals` collection, avoiding hierarchical dependencies. The `referrerId` and `referredUserId` are stored within each referral document, providing authorization independence.\n* **Shared Inbox:** Messages are stored in a top-level `/inbox_messages` collection for the shared inbox feature.\n* **Public Templates:** Templates are stored in a top-level `/templates` collection, making them publicly readable.\n\nThis structure facilitates simple and robust security rules by avoiding `get()` calls and enabling secure list operations (QAPs) by scoping user data under their respective user IDs and providing flat collections for public or semi-public data."
   }
 }
+
+    

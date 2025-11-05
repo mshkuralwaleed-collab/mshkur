@@ -2,20 +2,20 @@
  * @fileoverview Firestore Security Rules for Mshkur AI Studio.
  *
  * Core Philosophy:
- * This ruleset enforces a strict user-ownership model for point records, posts,
- * and social media accounts. It allows public read access to referral records
- * with owner-only writes. The shared inbox has restricted writes to authenticated
- * users, with owner-only modifications.
+ * This ruleset enforces a strict user-ownership model for all user-specific data.
+ * Public collections like templates and referrals have specific read/write access
+ * to support their functionality while protecting data integrity.
  *
  * Data Structure:
  * - User-specific data is nested under `/users/{userId}`.
- * - Global data (referrals, inbox) is in top-level collections.
+ * - Global data (referrals, inbox, templates) is in top-level collections.
  *
  * Key Security Decisions:
  * - Users can only access their own data within `/users/{userId}`.
  * - Referral records are publicly readable, but writes are owner-restricted.
  * - Shared inbox messages can be created by any authenticated user but can only
  *   be modified or deleted by the original creator.
+ * - Templates are publicly readable but writable only by admins (not implemented yet, so writes are locked).
  *
  * Denormalization for Authorization:
  * - `referrals` and `inbox_messages` documents store user IDs within each document
@@ -29,10 +29,9 @@ service cloud.firestore {
      * @description Grants access to a user's point records based on path-based ownership.
      */
     match /users/{userId}/points/{pointId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && isCorrectUser(request.resource.data);
+      allow update: if isSignedIn() && isExistingOwner(userId) && isCorrectUser(request.resource.data);
       allow delete: if isSignedIn() && isExistingOwner(userId);
     }
     
@@ -41,8 +40,8 @@ service cloud.firestore {
      */
     match /users/{userId}/posts/{postId} {
       allow get, list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow create: if isSignedIn() && isOwner(userId) && isCorrectUser(request.resource.data);
+      allow update: if isSignedIn() && isExistingOwner(userId) && isCorrectUser(request.resource.data);
       allow delete: if isSignedIn() && isExistingOwner(userId);
     }
 
@@ -51,8 +50,28 @@ service cloud.firestore {
      */
     match /users/{userId}/social_media_accounts/{accountId} {
       allow get, list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow create: if isSignedIn() && isOwner(userId) && isCorrectUser(request.resource.data);
+      allow update: if isSignedIn() && isExistingOwner(userId) && isCorrectUser(request.resource.data);
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Grants access to a user's analytics data.
+     */
+    match /users/{userId}/analytics/{analyticId} {
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && isCorrectUser(request.resource.data);
+      allow update: if isSignedIn() && isExistingOwner(userId) && isCorrectUser(request.resource.data);
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Grants access to a user's AI usage logs.
+     */
+    match /users/{userId}/ai_usage/{usageId} {
+      allow get, list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && isCorrectUser(request.resource.data);
+      allow update: if isSignedIn() && isExistingOwner(userId) && isCorrectUser(request.resource.data);
       allow delete: if isSignedIn() && isExistingOwner(userId);
     }
 
@@ -72,8 +91,16 @@ service cloud.firestore {
      */
     match /inbox_messages/{messageId} {
       allow get, list: if isSignedIn();
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isCorrectUser(request.resource.data);
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    /**
+     * @description Templates are public, but not writable for now.
+     */
+    match /templates/{templateId} {
+      allow get, list: if true;
+      allow create, update, delete: if false; // Protect templates from modification
     }
 
 
@@ -94,7 +121,10 @@ service cloud.firestore {
     function isExistingOwnerReferral(referrerId) {
       return isSignedIn() && request.auth.uid == referrerId && resource != null;
     }
+    
+    function isCorrectUser(data) {
+        return data.userId == request.auth.uid;
+    }
   }
 }
-
     

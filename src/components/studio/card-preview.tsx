@@ -29,6 +29,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { User } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 
 
 type CardPreviewProps = {
@@ -57,6 +59,7 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const { language } = useLanguage();
   const t = translations[language];
+  const { toast } = useToast();
 
   const handleWhatsAppShare = () => {
     const cardUrl = window.location.href;
@@ -68,25 +71,45 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
   };
 
   const handleSaveContact = () => {
-    const vCard = [
-      'BEGIN:VCARD',
-      'VERSION:3.0',
-      `FN:${cardData.name}`,
-      `TITLE:${cardData.title}`,
-      `EMAIL:${cardData.contact.email}`,
-      `TEL;TYPE=CELL:${cardData.contact.phone}`,
-      `URL:${cardData.contact.website}`,
-      `NOTE:${cardData.bio}`,
-      'END:VCARD',
-    ].join('\n');
+    try {
+      const vCard = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `FN:${cardData.name}`,
+        `TITLE:${cardData.title}`,
+        `EMAIL:${cardData.contact.email}`,
+        `TEL;TYPE=CELL:${cardData.contact.phone}`,
+        `URL:${cardData.contact.website}`,
+        `NOTE:${cardData.bio.replace(/\n/g, '\\n')}`,
+        cardData.avatarUrl ? `PHOTO;VALUE=URL:${cardData.avatarUrl}` : '',
+        'END:VCARD',
+      ].filter(Boolean).join('\n');
 
-    const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', `${cardData.name.replace(/\s/g, '_')}.vcf`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+      
+      if (window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveOrOpenBlob(blob, `${cardData.name}.vcf`);
+      } else {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', `${cardData.name.replace(/\s/g, '_')}.vcf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      }
+      toast({
+        title: 'Contact Saved',
+        description: 'The contact has been downloaded as a VCF file.',
+      });
+    } catch (error) {
+       toast({
+        variant: 'destructive',
+        title: 'Download Failed',
+        description: 'Could not save the contact file. Your browser may not be supported.',
+      });
+      console.error('vCard download error:', error);
+    }
   };
 
 

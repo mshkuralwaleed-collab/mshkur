@@ -29,7 +29,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { User } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
 

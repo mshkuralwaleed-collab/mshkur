@@ -2,15 +2,16 @@
   "name": "Mshkur AI Studio",
   "short_name": "Mshkur AI",
   "description": "Create your professional digital card with the power of AI.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#2B3035",
-  "theme_color": "#2B3035",
   "icons": [
     {
       "src": "/icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "theme_color": "#2B3035",
+  "background_color": "#2B3035",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
 }

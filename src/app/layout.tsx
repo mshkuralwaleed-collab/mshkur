@@ -36,6 +36,7 @@ export default function RootLayout({
               rel="stylesheet"
             />
             <meta name="theme-color" content="#2B3035" />
+            <link rel="manifest" href="/manifest.json" />
           </head>
           <body className={cn('font-body antialiased')}>
             {children}

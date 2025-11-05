@@ -196,23 +196,46 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
 
                <Separator className="bg-white/20" />
 
-              <div className="flex items-center justify-center gap-4 text-sm">
-                {cardData.contact.email && (
-                  <a href={`mailto:${cardData.contact.email}`} className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                    <Mail className="h-4 w-4" /> 
-                  </a>
-                )}
-                 {cardData.contact.phone && (
-                  <a href={`tel:${cardData.contact.phone}`} className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                    <Phone className="h-4 w-4" /> 
-                  </a>
-                )}
-                {cardData.contact.website && (
-                  <a href={`https://${cardData.contact.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                    <Globe className="h-4 w-4" /> 
-                  </a>
-                )}
-              </div>
+              <TooltipProvider>
+                <div className="flex items-center justify-center gap-4 text-sm">
+                  {cardData.contact.email && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a href={`mailto:${cardData.contact.email}`} className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                          <Mail className="h-4 w-4" /> 
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{cardData.contact.email}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {cardData.contact.phone && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a href={`tel:${cardData.contact.phone}`} className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                          <Phone className="h-4 w-4" /> 
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{cardData.contact.phone}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {cardData.contact.website && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a href={`https://${cardData.contact.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                          <Globe className="h-4 w-4" /> 
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{cardData.contact.website}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+              </TooltipProvider>
             </div>
           </CardContent>
         </div>

@@ -84,6 +84,45 @@ export default function RewardsPage() {
   
   const isLoading = isUserLoading || (user && isRewardsLoading);
 
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-64 w-full" />
+          ))}
+        </div>
+      );
+    }
+
+    if (!user) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-lg mb-4">{t['sign-in-to-view-rewards']}</p>
+          <Button onClick={handleSignIn} size="lg">
+            <GoogleIcon className="mr-2 -ml-1" />
+            {t['sign-in-with-google']}
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {rewards?.map(reward => (
+            <RewardCard key={reward.id} reward={reward} />
+          ))}
+        </div>
+        {!isLoading && rewards?.length === 0 && (
+          <div className="text-center text-muted-foreground py-12">
+            <p>{t['no-rewards-message']}</p>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Header />
@@ -92,35 +131,7 @@ export default function RewardsPage() {
           <h1 className="text-3xl font-bold tracking-tight mb-6">
             {t['rewards-title']}
           </h1>
-          
-          {!user && !isUserLoading && (
-            <div className="text-center py-12">
-                <p className='text-lg mb-4'>{t['sign-in-to-view-rewards']}</p>
-                 <Button onClick={handleSignIn} size="lg">
-                    <GoogleIcon className="mr-2 -ml-1" />
-                    {t['sign-in-with-google']}
-                </Button>
-            </div>
-          )}
-          
-          {user && (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {isLoading &&
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-64 w-full" />
-                  ))}
-                {rewards?.map(reward => (
-                  <RewardCard key={reward.id} reward={reward} />
-                ))}
-              </div>
-              {!isLoading && rewards?.length === 0 && (
-                <div className="text-center text-muted-foreground py-12">
-                  <p>{t['no-rewards-message']}</p>
-                </div>
-              )}
-            </>
-          )}
+          {renderContent()}
         </div>
       </main>
     </div>

@@ -25,6 +25,13 @@ import ChatbotSheet from './chatbot-sheet';
 import { useState } from 'react';
 import { useLanguage } from '@/context/language-context';
 import { translations } from '@/lib/locales';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
 
 type CardPreviewProps = {
   cardData: CardData;
@@ -120,17 +127,40 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
               ) : (
                 <div className="h-14 w-14 md:h-20 md:w-20"></div>
               )}
-               <div className="flex items-center gap-2">
-                <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={() => setIsChatbotOpen(true)}>
-                    <MessageCircle className="h-6 w-6" />
-                </Button>
-                <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={handleWhatsAppShare}>
-                    <WhatsAppIcon className="h-6 w-6" />
-                </Button>
-                <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={handleSaveContact}>
-                    <Save className="h-6 w-6" />
-                </Button>
-            </div>
+               <TooltipProvider>
+                <div className="flex items-center gap-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={() => setIsChatbotOpen(true)}>
+                        <MessageCircle className="h-6 w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t['chatbot-title']}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={handleWhatsAppShare}>
+                          <WhatsAppIcon className="h-6 w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Share on WhatsApp</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={handleSaveContact}>
+                          <Save className="h-6 w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Save Contact</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
             </div>
 
             <div className="flex flex-col items-center text-center">

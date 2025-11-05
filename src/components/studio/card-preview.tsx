@@ -62,6 +62,29 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
     window.open(whatsappUrl, '_blank');
   };
 
+  const handleSaveContact = () => {
+    const vCard = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `FN:${cardData.name}`,
+      `TITLE:${cardData.title}`,
+      `EMAIL:${cardData.contact.email}`,
+      `TEL;TYPE=CELL:${cardData.contact.phone}`,
+      `URL:${cardData.contact.website}`,
+      `NOTE:${cardData.bio}`,
+      'END:VCARD',
+    ].join('\n');
+
+    const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', `${cardData.name.replace(/\s/g, '_')}.vcf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
   return (
     <>
     <div className="sticky top-20">
@@ -104,7 +127,7 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
                 <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={handleWhatsAppShare}>
                     <WhatsAppIcon className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20">
+                <Button size="icon" variant="outline" className="bg-white/10 text-white backdrop-blur-sm border-white/20 hover:bg-white/20" onClick={handleSaveContact}>
                     <Save className="h-4 w-4" />
                 </Button>
             </div>

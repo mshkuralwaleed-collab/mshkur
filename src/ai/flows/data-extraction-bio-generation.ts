@@ -21,7 +21,7 @@ const DataExtractionAndBioGenerationInputSchema = z.object({
 export type DataExtractionAndBioGenerationInput = z.infer<typeof DataExtractionAndBioGenerationInputSchema>;
 
 const DataExtractionAndBioGenerationOutputSchema = z.object({
-  extractedData: z.string().describe('The extracted data from the image.'),
+  extractedData: z.string().describe('The extracted data from the image as a JSON string, including fields like name, title, email, phone, and website.'),
   bio: z.string().describe('A professional bio generated based on the extracted data.'),
 });
 export type DataExtractionAndBioGenerationOutput = z.infer<typeof DataExtractionAndBioGenerationOutputSchema>;
@@ -34,7 +34,16 @@ const ocrPrompt = ai.definePrompt({
   name: 'ocrPrompt',
   input: {schema: DataExtractionAndBioGenerationInputSchema},
   output: {schema: z.object({extractedData: z.string()})},
-  prompt: `You are an OCR expert. Extract all text from the following image of a business card: {{media url=photoDataUri}}.\n\nExtracted Text:`,
+  prompt: `You are an OCR expert. Extract all relevant contact information from the following image of a business card: {{media url=photoDataUri}}.
+
+Return the data as a valid JSON object. Identify and extract the following fields if they are present:
+- name
+- title
+- contact (as an object containing email, phone, website)
+
+If a field is not present, omit it from the JSON.
+
+JSON Output:`,
 });
 
 const bioPrompt = ai.definePrompt({

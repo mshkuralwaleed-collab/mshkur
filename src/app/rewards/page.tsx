@@ -9,6 +9,9 @@ import type { Reward } from '@/lib/types';
 import { useLanguage } from '@/context/language-context';
 import { translations } from '@/lib/locales';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect } from 'react';
+import { addDocumentNonBlocking } from '@/firebase';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function RewardsPage() {
   const firestore = useFirestore();
@@ -17,6 +20,30 @@ export default function RewardsPage() {
 
   const rewardsQuery = query(collection(firestore, 'rewards'));
   const { data: rewards, isLoading } = useCollection<Reward>(rewardsQuery);
+  
+  useEffect(() => {
+    // This is a one-time operation to seed initial data for demonstration.
+    // In a real app, this would be managed by an admin panel.
+    const seedData = async () => {
+        const rewardImage = PlaceHolderImages.find(p => p.id === 'reward-1');
+        if (rewardImage) {
+            const sampleReward: Omit<Reward, 'id'> = {
+                name: 'Exclusive Template Pack',
+                description: 'Unlock a set of 5 premium, designer-made card templates.',
+                pointsCost: 250,
+                imageUrl: rewardImage.imageUrl,
+            };
+            
+            // A simple check to prevent re-seeding on every page load in development
+            const seeded = sessionStorage.getItem('rewards_seeded');
+            if (!seeded && firestore) {
+                 addDocumentNonBlocking(collection(firestore, 'rewards'), sampleReward);
+                 sessionStorage.setItem('rewards_seeded', 'true');
+            }
+        }
+    };
+    seedData();
+  }, [firestore]);
 
   return (
     <div className="flex min-h-screen w-full flex-col">

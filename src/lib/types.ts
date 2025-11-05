@@ -22,3 +22,18 @@ export type Reward = {
   pointsCost: number;
   imageUrl: string;
 };
+
+export type Analytics = {
+  id: string;
+  timestamp: any; // Firestore Timestamp
+  eventType: 'cardView' | 'linkClick' | 'share';
+  details?: {
+    [key: string]: any;
+  };
+};
+
+export type MonthlyAnalytics = {
+  name: string; // e.g., "Jan", "Feb"
+  views: number;
+  shares: number;
+};

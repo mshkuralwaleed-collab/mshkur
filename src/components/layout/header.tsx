@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/context/language-context';
 import { translations } from '@/lib/locales';
-import { Languages, Gift } from 'lucide-react';
+import { Languages, Gift, BarChart2 } from 'lucide-react';
 import {
   useUser,
   useAuth,
@@ -120,6 +120,12 @@ export default function Header() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/analytics">
+                      <BarChart2 className="mr-2 h-4 w-4" />
+                      <span>Analytics</span>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/rewards">
                       <Gift className="mr-2 h-4 w-4" />

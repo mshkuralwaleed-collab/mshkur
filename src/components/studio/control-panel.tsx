@@ -67,9 +67,14 @@ export default function ControlPanel({
       logoColors: 'blue and white',
     },
   });
-  const backgroundForm = useForm<{ prompt: string }>();
+  const backgroundForm = useForm<{ prompt: string }>({
+    defaultValues: {
+      prompt: 'Calm, dark 4K video with flowing blue and green neon lines in a 3D pattern.',
+    },
+  });
 
   const [extractedText, setExtractedText] = useState('');
+  const [ocrFileSelected, setOcrFileSelected] = useState(false);
   const { language } = useLanguage();
   const t = translations[language];
 
@@ -93,7 +98,6 @@ export default function ControlPanel({
           prompt: copilotPrompt,
         });
         const parsedData = JSON.parse(result.cardData);
-        // Ensure that all expected fields are present, providing defaults if not
         const newCardData: CardData = {
           name: parsedData.name || cardData.name,
           title: parsedData.title || cardData.title,
@@ -106,7 +110,7 @@ export default function ControlPanel({
           skills: Array.isArray(parsedData.skills)
             ? parsedData.skills
             : cardData.skills,
-          logoUrl: cardData.logoUrl, // Preserve existing images
+          logoUrl: cardData.logoUrl,
           backgroundUrl: cardData.backgroundUrl,
           avatarUrl: cardData.avatarUrl,
         };
@@ -188,8 +192,11 @@ export default function ControlPanel({
       const reader = new FileReader();
       reader.onloadend = () => {
         ocrForm.setValue('photoDataUri', reader.result as string);
+        setOcrFileSelected(true);
       };
       reader.readAsDataURL(file);
+    } else {
+      setOcrFileSelected(false);
     }
   };
 
@@ -232,7 +239,7 @@ export default function ControlPanel({
                   rows={4}
                 />
               </div>
-              <Button type="submit" disabled={isPending} className="w-full">
+              <Button type="submit" disabled={isPending || !copilotPrompt.trim()} className="w-full">
                 {isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -259,7 +266,7 @@ export default function ControlPanel({
                     />
                     <Button
                       onClick={handleOcrSubmit}
-                      disabled={isPending}
+                      disabled={isPending || !ocrFileSelected}
                       variant="secondary"
                     >
                       {isPending ? (

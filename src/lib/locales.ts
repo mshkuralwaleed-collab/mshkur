@@ -42,6 +42,10 @@ export const translations = {
     'chatbot-desc': 'Ask me anything about this person.',
     'chatbot-placeholder': 'Type your question...',
     'chatbot-error': 'Sorry, I ran into an issue. Please try again.',
+    'rewards-title': 'Rewards Store',
+    'no-rewards-message': 'No rewards available at the moment. Check back soon!',
+    'points-label': 'Points',
+    'redeem-button': 'Redeem',
   },
   ar: {
     'mshkur-ai-studio': 'استوديو مشكور للذكاء الاصطناعي',
@@ -87,5 +91,9 @@ export const translations = {
     'chatbot-desc': 'اسألني أي شيء عن هذا الشخص.',
     'chatbot-placeholder': 'اكتب سؤالك...',
     'chatbot-error': 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.',
+    'rewards-title': 'متجر المكافآت',
+    'no-rewards-message': 'لا توجد مكافآت متاحة في الوقت الحالي. تحقق مرة أخرى قريبًا!',
+    'points-label': 'نقاط',
+    'redeem-button': 'استبدال',
   },
 };

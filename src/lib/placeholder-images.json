@@ -5,6 +5,12 @@
       "description": "Default user avatar placeholder",
       "imageUrl": "https://images.unsplash.com/photo-1521119989659-a83eee488004?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjIyODA1NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "person portrait"
+    },
+    {
+      "id": "reward-1",
+      "description": "Exclusive Template Pack Reward",
+      "imageUrl": "https://images.unsplash.com/photo-1755274556200-f9641c2998f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxleGNsdXNpdmUlMjB0ZW1wbGF0ZXxlbnwwfHx8fDE3NjIzMDQ1MDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "exclusive template"
     }
   ]
 }

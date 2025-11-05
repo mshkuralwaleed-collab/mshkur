@@ -14,3 +14,11 @@ export type CardData = {
 };
 
 export type Language = 'en' | 'ar';
+
+export type Reward = {
+  id: string;
+  name: string;
+  description: string;
+  pointsCost: number;
+  imageUrl: string;
+};

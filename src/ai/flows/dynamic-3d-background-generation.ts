@@ -25,7 +25,7 @@ const Generate3DBackgroundOutputSchema = z.object({
   videoDataUri: z
     .string()
     .describe(
-      'The generated 3D video background as a data URI (video/mp4) that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'      
+      "The generated 3D video background as a data URI (video/mp4) that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
 export type Generate3DBackgroundOutput = z.infer<
@@ -38,15 +38,6 @@ export async function generate3DBackground(
   return generate3DBackgroundFlow(input);
 }
 
-const generate3DBackgroundPrompt = ai.definePrompt({
-  name: 'generate3DBackgroundPrompt',
-  input: {schema: Generate3DBackgroundInputSchema},
-  output: {schema: Generate3DBackgroundOutputSchema},
-  prompt: `You are an expert in generating prompts for 3D video generation.
-  Based on the user's description, generate a detailed and creative prompt suitable for a 3D video generation model.
-  User Description: {{{prompt}}}`,
-});
-
 const generate3DBackgroundFlow = ai.defineFlow(
   {
     name: 'generate3DBackgroundFlow',
@@ -54,18 +45,10 @@ const generate3DBackgroundFlow = ai.defineFlow(
     outputSchema: Generate3DBackgroundOutputSchema,
   },
   async input => {
-    // First, generate a refined prompt using the prompt generator.
-    const {output: refinedPromptOutput} = await generate3DBackgroundPrompt(input);
-    const refinedPrompt = refinedPromptOutput?.videoDataUri;
-
-    if (!refinedPrompt) {
-      throw new Error('Failed to generate a refined prompt.');
-    }
-
     // Generate the video using the Veo model.
     let {operation} = await ai.generate({
       model: 'googleai/veo-2.0-generate-001',
-      prompt: refinedPrompt,
+      prompt: input.prompt,
       config: {
         durationSeconds: 5,
         aspectRatio: '16:9',
@@ -91,8 +74,6 @@ const generate3DBackgroundFlow = ai.defineFlow(
     if (!video) {
       throw new Error('Failed to find the generated video');
     }
-
-    //console.log(`Video URL: ${video.media!.url}`);
 
     return {videoDataUri: video.media!.url};
   }

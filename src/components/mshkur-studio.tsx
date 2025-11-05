@@ -39,7 +39,7 @@ export default function MshkurStudio() {
       className="container mx-auto p-4 md:p-8"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 pt-8">
         <div className="lg:col-span-3">
           <CardPreview cardData={cardData} />
         </div>

@@ -36,7 +36,7 @@ export default function RootLayout({
               rel="stylesheet"
             />
             <meta name="theme-color" content="#2B3035" />
-            <link rel="manifest" href="/manifest.json" />
+            <link rel="apple-touch-icon" href="/icon.png" />
           </head>
           <body className={cn('font-body antialiased')}>
             {children}

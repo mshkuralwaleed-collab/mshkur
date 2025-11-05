@@ -23,10 +23,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useForm } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
 import {
   Bot,
@@ -57,8 +57,18 @@ export default function ControlPanel({
 }: ControlPanelProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const form = useForm({ defaultValues: cardData });
-  const ocrForm = useForm<{ prompt: string; photoDataUri: string }>();
+  
+  const copilotForm = useForm<{ prompt: string }>();
+  const ocrForm = useForm<{ photoDataUri: string }>();
+  const logoForm = useForm({
+    defaultValues: {
+      brandName: cardData.name,
+      logoStyle: 'minimalist',
+      logoColors: 'blue and white',
+    },
+  });
+  const backgroundForm = useForm<{ prompt: string }>();
+  
   const [extractedText, setExtractedText] = useState('');
   const { language } = useLanguage();
   const t = translations[language];
@@ -80,16 +90,12 @@ export default function ControlPanel({
           prompt: data.prompt,
         });
         const parsedData = JSON.parse(result.cardData);
-        setCardData(prev => ({
-          ...prev,
-          ...parsedData,
-          skills: parsedData.skills || [],
-        }));
-        form.reset({
+        const newCardData = {
           ...cardData,
           ...parsedData,
           skills: parsedData.skills || [],
-        });
+        };
+        setCardData(newCardData);
         toast({
           title: t['ai-copilot-success-title'],
           description: t['ai-copilot-success-desc'],
@@ -117,7 +123,6 @@ export default function ControlPanel({
         });
         setExtractedText(extractedData);
         setCardData(prev => ({ ...prev, bio }));
-        form.setValue('bio', bio);
         toast({
           title: t['ocr-success-title'],
           description: t['ocr-success-desc'],
@@ -198,14 +203,13 @@ export default function ControlPanel({
 
           {/* AI Copilot Tab */}
           <TabsContent value="copilot">
-            <Form {...useForm<{ prompt: string }>()}>
+            <Form {...copilotForm}>
               <form
-                onSubmit={useForm<{ prompt: string }>().handleSubmit(
-                  onCopilotSubmit
-                )}
+                onSubmit={copilotForm.handleSubmit(onCopilotSubmit)}
                 className="space-y-4 pt-4"
               >
                 <FormField
+                  control={copilotForm.control}
                   name="prompt"
                   render={({ field }) => (
                     <FormItem>
@@ -235,61 +239,52 @@ export default function ControlPanel({
 
           {/* Details & OCR Tab */}
           <TabsContent value="details">
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="ocr-file">{t['ocr-label']}</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="ocr-file"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="flex-grow"
-                  />
-                  <Button
-                    onClick={handleOcrSubmit}
-                    disabled={isPending}
-                    variant="secondary"
-                  >
-                    {isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
-                  </Button>
+            <Form {...ocrForm}>
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ocr-file">{t['ocr-label']}</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="ocr-file"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="flex-grow"
+                    />
+                    <Button
+                      onClick={handleOcrSubmit}
+                      disabled={isPending}
+                      variant="secondary"
+                    >
+                      {isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
+                {extractedText && (
+                  <Textarea
+                    value={extractedText}
+                    readOnly
+                    rows={5}
+                    placeholder={t['ocr-placeholder']}
+                  />
+                )}
               </div>
-              {extractedText && (
-                <Textarea
-                  value={extractedText}
-                  readOnly
-                  rows={5}
-                  placeholder={t['ocr-placeholder']}
-                />
-              )}
-            </div>
+            </Form>
           </TabsContent>
 
           {/* Logo Tab */}
           <TabsContent value="logo">
-            <Form
-              {...useForm({
-                defaultValues: {
-                  brandName: cardData.name,
-                  logoStyle: 'minimalist',
-                  logoColors: 'blue and white',
-                },
-              })}
-            >
+            <Form {...logoForm}>
               <form
-                onSubmit={useForm<{
-                  brandName: string;
-                  logoStyle: string;
-                  logoColors: string;
-                }>().handleSubmit(onLogoSubmit)}
+                onSubmit={logoForm.handleSubmit(onLogoSubmit)}
                 className="space-y-4 pt-4"
               >
                 <FormField
+                  control={logoForm.control}
                   name="brandName"
                   render={({ field }) => (
                     <FormItem>
@@ -301,6 +296,7 @@ export default function ControlPanel({
                   )}
                 />
                 <FormField
+                  control={logoForm.control}
                   name="logoStyle"
                   render={({ field }) => (
                     <FormItem>
@@ -315,6 +311,7 @@ export default function ControlPanel({
                   )}
                 />
                 <FormField
+                  control={logoForm.control}
                   name="logoColors"
                   render={({ field }) => (
                     <FormItem>
@@ -342,14 +339,13 @@ export default function ControlPanel({
 
           {/* Background Tab */}
           <TabsContent value="background">
-            <Form {...useForm<{ prompt: string }>()}>
+            <Form {...backgroundForm}>
               <form
-                onSubmit={useForm<{ prompt: string }>().handleSubmit(
-                  onBackgroundSubmit
-                )}
+                onSubmit={backgroundForm.handleSubmit(onBackgroundSubmit)}
                 className="space-y-4 pt-4"
               >
                 <FormField
+                  control={backgroundForm.control}
                   name="prompt"
                   render={({ field }) => (
                     <FormItem>
@@ -381,3 +377,5 @@ export default function ControlPanel({
     </Card>
   );
 }
+
+    

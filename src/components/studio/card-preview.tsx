@@ -65,8 +65,8 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
   return (
     <>
     <div className="sticky top-20">
-      <Card className="overflow-hidden shadow-2xl shadow-primary/10">
-        <div className="relative aspect-[9/16] w-full">
+      <Card className="overflow-hidden shadow-2xl shadow-primary/10 w-full max-w-md mx-auto aspect-[9/16] max-h-[85vh]">
+        <div className="relative h-full w-full">
           {cardData.backgroundUrl ? (
             <video
               src={cardData.backgroundUrl}
@@ -83,7 +83,7 @@ export default function CardPreview({ cardData }: CardPreviewProps) {
 
           <div className="absolute inset-0 bg-black/40"></div>
 
-          <CardContent className="relative z-10 flex h-full flex-col justify-between p-6 text-white md:p-8">
+          <CardContent className="relative z-10 flex h-full flex-col justify-between p-6 text-white overflow-y-auto">
             <div className="flex items-start justify-between">
               {cardData.logoUrl ? (
                 <Image
